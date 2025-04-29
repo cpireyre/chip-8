@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <assert.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -71,13 +72,124 @@ void	run(Chip *chip)
 		else if ((code & 0xf000) == 0x1000) /* JP */
 		{
 			val = code & 0x0fff;
-			chip->pc = val - 2;
+			chip->pc = val;
+			continue;
+		}
+		else if (code == 0x00ee) /* RET */
+		{
+			chip->pc = chip->stack[chip->top];
+			chip->top--;
+		}
+		else if ((code & 0xf000) == 0x2000) /* CALL */
+		{
+			chip->stack[++chip->top] = chip->pc;
+			chip->pc = code & 0x0fff;
+		}
+		else if ((code & 0xf000) == 0x3000) /* SE */
+		{
+			val = code & 0x00ff;
+			reg = (code & 0x0f00) >> 8;
+			chip->pc += 2 * (chip->reg[reg] == val);
+		}
+		else if ((code & 0xf000) == 0x4000) /* SNE */
+		{
+			val = code & 0x00ff;
+			reg = (code & 0x0f00) >> 8;
+			chip->pc += 2 * (chip->reg[reg] != val);
+		}
+		else if ((code & 0xf000) == 0x5000) /* SExy */
+		{
+			x = (code & 0x0f00) >> 8;
+			y = (code & 0x00f0) >> 4;
+			chip->pc += 2 * (chip->reg[x] == chip->reg[y]);
+		}
+		else if ((code & 0xf000) == 0x8000) /* LDxy */
+		{
+			x = (code & 0x0f00) >> 8;
+			y = (code & 0x00f0) >> 4;
+			chip->reg[x] = chip->reg[y];
+		}
+		else if ((code & 0xf00f) == 0x8001) /* ORxy */
+		{
+			x = (code & 0x0f00) >> 8;
+			y = (code & 0x00f0) >> 4;
+			chip->reg[x] |= chip->reg[y];
+		}
+		else if ((code & 0xf00f) == 0x8002) /* ANDxy */
+		{
+			x = (code & 0x0f00) >> 8;
+			y = (code & 0x00f0) >> 4;
+			chip->reg[x] &= chip->reg[y];
+		}
+		else if ((code & 0xf00f) == 0x8003) /* XORxy */
+		{
+			x = (code & 0x0f00) >> 8;
+			y = (code & 0x00f0) >> 4;
+			chip->reg[x] ^= chip->reg[y];
+		}
+		else if ((code & 0xf00f) == 0x8004) /* ADDxy */
+		{
+			x = chip->reg[(code & 0x0f00) >> 8];
+			y = chip->reg[(code & 0x00f0) >> 4];
+			val = x + y;
+			chip->reg[0xf] = val < x | val < y;
+			chip->reg[(code & 0x0f00) >> 8] = val;
+		}
+		else if ((code & 0xf00f) == 0x8005) /* SUBxy */
+		{
+			x = chip->reg[(code & 0x0f00) >> 8];
+			y = chip->reg[(code & 0x00f0) >> 4];
+			val = x - y;
+			chip->reg[0xf] = x > y;
+			chip->reg[(code & 0x0f00) >> 8] = val;
+		}
+		else if ((code & 0xf00f) == 0x8006) /* SHRx */
+		{
+			x = chip->reg[(code & 0x0f00) >> 8];
+			chip->reg[0xf] = x & 1;
+			chip->reg[(code & 0x0f00) >> 8] >>= 1;
+		}
+		else if ((code & 0xf00f) == 0x8007) /* SUBNxy */
+		{
+			x = chip->reg[(code & 0x0f00) >> 8];
+			y = chip->reg[(code & 0x00f0) >> 4];
+			val = x - y;
+			chip->reg[0xf] = y > x;
+			chip->reg[(code & 0x0f00) >> 8] = val;
+		}
+		else if ((code & 0xf00f) == 0x800E) /* SHLx */
+		{
+			x = chip->reg[(code & 0x0f00) >> 8];
+			chip->reg[0xf] = x & 1;
+			chip->reg[(code & 0x0f00) >> 8] <<= 1;
+		}
+		else if ((code & 0xf000) == 0x9000) /* SNExy */
+		{
+			x = chip->reg[(code & 0x0f00) >> 8];
+			y = chip->reg[(code & 0x00f0) >> 4];
+			chip->pc += 2 * (x != y);
+		}
+		else if ((code & 0xf000) == 0xB000) /* JP V0 */
+		{
+			chip->pc = chip->reg[0] + (code & 0x0fff);
+		}
+		else if ((code & 0xf000) == 0xC000) /* RND Vx */
+		{
+			val = rand() & (code & 0x00ff);
+			chip->reg[code & 0x0f00] = val;
+		}
+		else if ((code & 0xf0ff) == 0xE09E) /* SKP Vx */
+		{
+			/* TODO */
+		}
+		else if ((code & 0xf0ff) == 0xE0A1) /* SKNP Vx */
+		{
+			/* TODO */
 		}
 		else
 		{
 		}
 		chip->pc += 2;
-		/* puts(""); */
 	}
 }
 
@@ -100,8 +212,14 @@ int	main(int argc, char **argv)
 
 uint8_t blink(uint8_t *screen, uint8_t x, uint8_t y)
 {
-	screen[x >> 3 | y << 3] ^= 1 << (x & 7);
-	return (screen[x >> 3 | y << 3]);
+	const uint8_t	fore = screen[x >> 3 | y << 3];
+
+	if (0 <= x && x <= 63 && 0 <= y && y <= 31)
+	{
+		screen[x >> 3 | y << 3] ^= 1 << (x & 7);
+		return (screen[x >> 3 | y << 3] < fore);
+	}
+	return (0);
 }
 
 uint8_t	draw(uint8_t *screen, uint8_t col, uint8_t row, uint8_t *sprite, uint8_t size)
