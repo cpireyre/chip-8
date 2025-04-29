@@ -18,13 +18,68 @@ typedef struct
 	uint8_t		top;
 } Chip;
 
-# define CLS 0x00e0
-uint16_t swap(uint16_t x) { return (x >> 8 | x << 8); }
+void	boot(Chip *chip);
+int	load(uint8_t *mem, const char *path);
+void dump(Chip *chip);
+void	show(uint8_t *screen);
+void	peek(Chip *chip);
+uint8_t	draw(uint8_t *screen, uint8_t col, uint8_t row, uint8_t *sprite, uint8_t size);
 
-static void	boot(Chip *chip);
-static int	load(uint8_t *mem, const char *path);
-static void dump(Chip *chip);
-static void	show(uint8_t *screen);
+
+void	run(Chip *chip)
+{
+	uint16_t	code;
+	uint8_t		reg;
+	uint16_t	val;
+	uint8_t		size;
+	uint8_t		x, y;
+
+	while (chip->pc < 0x3f1)
+	{
+		/* peek(chip); */
+		code = chip->mem[chip->pc] << 8 | chip->mem[chip->pc + 1];
+		if (code == 0x00e0) /* CLS */
+		{
+			bzero(chip->screen, sizeof(chip->screen));
+		}
+		else if ((code & 0xf000) == 0xa000) /* LDI */
+		{
+			chip->I = code & 0x0fff;
+		}
+		else if ((code & 0xf000) == 0x6000) /* LDV */
+		{
+			val = code & 0x00ff;
+			reg = (code & 0x0f00) >> 8;
+			chip->reg[reg] = val;
+		}
+		else if ((code & 0xf000) == 0xd000) /* DRW */
+		{
+			reg = (code & 0x0f00) >> 8;
+			x = chip->reg[reg];
+			reg = (code & 0x00f0) >> 4;
+			y = chip->reg[reg];
+			size = code & 0x000f;
+			chip->reg[0xf] = draw(chip->screen, x, y, chip->mem + chip->I, size);
+			/* printf("D(%d, %d)\n", x, y); */
+		}
+		else if ((code & 0xf000) == 0x7000) /* ADD */
+		{
+			reg = (code & 0x0f00) >> 8;
+			val = code & 0x00ff;
+			chip->reg[reg] += val;
+		}
+		else if ((code & 0xf000) == 0x1000) /* JP */
+		{
+			val = code & 0x0fff;
+			chip->pc = val - 2;
+		}
+		else
+		{
+		}
+		chip->pc += 2;
+		/* puts(""); */
+	}
+}
 
 int	main(int argc, char **argv)
 {
@@ -37,88 +92,118 @@ int	main(int argc, char **argv)
 	err = load(chip.mem, argv[1]);
 	if (err)
 		return (1);
-	(void)dump;
 	/* dump(&chip); */
-	show(chip.screen);
+	(void)dump;
+	run(&chip);
 	return (0);
 }
 
-static void	blink(uint8_t *screen, uint8_t x, uint8_t y)
+uint8_t blink(uint8_t *screen, uint8_t x, uint8_t y)
 {
 	screen[x >> 3 | y << 3] ^= 1 << (x & 7);
+	return (screen[x >> 3 | y << 3]);
 }
 
-static void	show(uint8_t *screen)
+uint8_t	draw(uint8_t *screen, uint8_t col, uint8_t row, uint8_t *sprite, uint8_t size)
+{
+	uint8_t	n;
+
+	col &= 63;
+	row &= 31;
+	while (size--)
+	{
+		for (n = 0; n < 8; n++)
+			if ((*sprite >> (7 - n)) & 1)
+				blink(screen, col + n, row);
+		sprite++;
+		row++;
+	}
+	show(screen);
+	return (0);
+}
+
+void	show(uint8_t *screen)
 {
 	uint8_t		row, col;
 	uint8_t		index;
-	uint32_t	distance;
-	uint8_t		centerx, centery;
-	uint8_t		radius;
-	uint8_t		square;
 
-	centerx = 18;
-	centery = 17;
-	radius = 4;
-	square = radius * radius;
-	for (row = 0; row < 32; row++)
-	{
-		for (col = 0; col < 64; col++)
-		{
-			distance = (col - centerx) * (col - centerx) + (row - centery) * (row - centery);
-			if (0 <= distance - square && distance - square <= 16)
-				blink(screen, col, row);
-		}
-	}
+	printf("\x1b[H");
 	for (row = 0; row < 32; row++)
 	{
 		for (col = 0; col < 64; col++)
 		{
 			index = col >> 3 | row << 3;
 			if ((screen[index] >> (col & 7)) & 1)
-				write(1, "1", 1);
+			{
+				/* write(1, "*", 1); */
+				write(1, "█", 3);
+			}
 			else
-				write(1, "0", 1);
+				write(1, " ", 1);
 		}
 		write(1, "\n", 1);
 	}
 }
 
-static void	boot(Chip *chip)
+void	boot(Chip *chip)
 {
 	bzero(chip, sizeof(*chip));
 	chip->pc = 0x200;
 }
 
-static void dump(Chip *chip)
+void dump(Chip *chip)
 {
-    int 					i, j;
-    uint16_t 				value;
-    static const uint8_t	zeros[16];
+	int 					i, j;
+	uint16_t 				value;
+	const uint8_t	zeros[16];
 	uint8_t					*mem;
 
 	mem = chip->mem;
-    for (i = 0x200; i < 0x400; i += 16)
-    {
-        if (memcmp(mem + i, zeros, 16) == 0)
-            continue;
+	for (i = 0x200; i < 0x400; i += 16)
+	{
+		if (memcmp(mem + i, zeros, 16) == 0)
+			continue;
 
-        printf("%08x: ", i);
-        for (j = 0; j < 16; j += 2)
-        {
-            value = (mem[i + j] << 8) | mem[i + j + 1];
+		printf("%08x: ", i);
+		for (j = 0; j < 16; j += 2)
+		{
+			value = (mem[i + j] << 8) | mem[i + j + 1];
 			if (i + j == chip->pc)
 				printf("\x1b[0;7m");
 			printf("%04x", value);
 			if (i + j == chip->pc)
 				printf("\x1b[0;27m");
 			printf(" ");
-        }
-        printf("\n");
-    }
+		}
+		printf("\n");
+	}
 }
 
-static int	load(uint8_t *mem, const char *path)
+void	peek(Chip *chip)
+{
+	uint8_t					j;
+	uint16_t 				value;
+	uint8_t					*mem;
+	uint16_t				offset;
+
+	mem = chip->mem;
+	offset = chip->pc & 0xfff0;
+	printf("%08x: ", offset);
+	for (j = 0; j < 16; j += 2)
+	{
+		value = (mem[offset + j] << 8) | mem[offset + j + 1];
+		if (offset + j == chip->pc)
+			printf("\x1b[0;7m");
+		printf("%04x", value);
+		if (offset + j == chip->pc)
+			printf("\x1b[0;27m");
+		printf(" ");
+	}
+	printf("\t");
+
+}
+
+int	load(uint8_t *mem, const char *path)
 {
 	int program_fd;
 	int program_data_bytes;
