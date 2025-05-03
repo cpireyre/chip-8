@@ -1,0 +1,40 @@
+#ifndef BOX_H
+# define BOX_H
+
+# include <stdint.h>
+
+/* TODO: Forward declare to make implementation opaque? */
+typedef struct
+{
+	uint8_t		ram[4096];
+	uint8_t		pix[256];
+	uint8_t		bay[16];
+	uint16_t	eye;
+	uint16_t	now;
+	uint16_t	jar[12];
+	uint8_t		top;
+} Box;
+
+typedef void (*opcode)(Box *, uint16_t);
+
+void		boot(Box *box);
+uint8_t		peek(Box *box, uint16_t addr);
+void		poke(Box *box, uint16_t addr, uint8_t byte);
+void		dock(Box *box, uint8_t x, uint8_t val);
+uint8_t		vx(Box *box, uint8_t x);
+uint16_t	look(Box *box);
+void		keep(Box *box, uint16_t addr);
+uint16_t 	here(Box *box);
+void 		jump(Box *box, uint16_t addr);
+void 		give(Box *box, uint16_t addr);
+uint16_t 	grab(Box *box);
+void		wipe(Box *box);
+uint8_t		draw(Box *box, uint8_t x, uint8_t y,
+				uint16_t addr, uint8_t size);
+uint8_t		roll(void);
+
+/* IO */
+
+void	show(Box *box);
+
+#endif /* BOX_H */
