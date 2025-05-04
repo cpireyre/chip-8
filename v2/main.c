@@ -12,7 +12,6 @@ static int		slurp(Box *box, const char *path);
 # define nib(code) ((code & 0xf000) >> 12)
 # define last(code) (code & 0x000f)
 
-/* TODO: PC is incremented even after RET or JP or CALL! */
 void	run(Box *box)
 {
 	uint16_t	code;
@@ -21,32 +20,32 @@ void	run(Box *box)
 	{
 		code = fetch(box);
 		switch (code) {
-			case 0x00e0: CLS(box, code); break;
-			case 0x00ee: RET(box, code); break;
+			case 0x00E0: CLS(box, code); break;
+			case 0x00EE: RET(box, code); break;
 		}
 		switch (nib(code)) {
 			case 0xA: LDI(box, code); break;
-			case 0x2: CALL(box, code); break;
+			case 0x2: CALL(box, code); continue;
 			case 0x3: SE(box, code); break;
 			case 0x4: SNE(box, code); break;
 			case 0x5: SEXY(box, code); break;
 			case 0x6: LD(box, code); break;
 			case 0x7: ADD(box, code); break;
 			case 0x8: {
-									switch (last(code)) {
-										case 0x0: LDXY(box, code); break;
-										case 0x1: OR(box, code); break;
-										case 0x2: AND(box, code); break;
-										case 0x3: XOR(box, code); break;
-										case 0x4: ADD(box, code); break;
-										case 0x5: SUBXY(box, code); break;
-										case 0x6: SHR(box, code); break;
-										case 0x7: SUBN(box, code); break;
-										case 0xE: SHL(box, code); break;
-									}
-								}
+						  switch (last(code)) {
+							  case 0x0: LDXY(box, code); break;
+							  case 0x1: OR(box, code); break;
+							  case 0x2: AND(box, code); break;
+							  case 0x3: XOR(box, code); break;
+							  case 0x4: ADDXY(box, code); break;
+							  case 0x5: SUBXY(box, code); break;
+							  case 0x6: SHR(box, code); break;
+							  case 0x7: SUBN(box, code); break;
+							  case 0xE: SHL(box, code); break;
+						  }
+					  }
 								break;
-			case 0x1: JP(box, code); break;
+			case 0x1: JP(box, code); continue;
 			case 0xD: DRW(box, code); show(box); break;
 			case 0x9: SNEXY(box, code); break;
 			case 0xB: JP0(box, code); break;

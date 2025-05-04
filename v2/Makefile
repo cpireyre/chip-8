@@ -5,4 +5,7 @@ CFLAGS += -fsanitize=address,undefined -g
 PHONY: all
 all: main.c box.c test.c io.c opcodes.c
 	clang $(CFLAGS) $^ -o chip8
-	./chip8 "1-chip8-logo.ch8"
+
+PHONY: test
+test: all
+	./chip8 "3-corax+.ch8"

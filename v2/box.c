@@ -40,18 +40,21 @@ void jump(Box *box, uint16_t addr) {
 }
 
 void give(Box *box, uint16_t addr) {
-	box->jar[box->top++] = addr;
+	box->top += 1;
+	box->jar[box->top] = addr;
 }
 
 uint16_t grab(Box *box) {
-	return (box->jar[--box->top]);
+	const uint16_t val = box->jar[box->top];
+	box->top -= 1;
+	return (val);
 }
 
 uint8_t	draw(Box *box, uint8_t x, uint8_t y,
 		uint16_t addr, uint8_t size)
 {
 	uint8_t	n;
-	uint8_t	fore;
+	uint8_t	tmp;
 	uint8_t	flag;
 	uint8_t	col;
 	uint8_t *sprite = box->ram + addr;
@@ -68,9 +71,9 @@ uint8_t	draw(Box *box, uint8_t x, uint8_t y,
 				col = x + n;
 				if (0 <= col && col <= 63 && 0 <= y && y <= 31)
 				{
-					fore = box->pix[col >> 3 | y << 3];
+					tmp = box->pix[col >> 3 | y << 3];
 					box->pix[col >> 3 | y << 3] ^= 1 << (col & 7);
-					flag |= box->pix[col >> 3 | y << 3] < fore;
+					flag |= box->pix[col >> 3 | y << 3] < tmp;
 				}
 			}
 		}
@@ -86,3 +89,8 @@ void	wipe(Box *box)
 }
 
 uint8_t	roll(void) { return ((uint8_t)rand()); }
+
+void	hold(Box *box, uint8_t lag) { box->lag = lag; }
+uint8_t	ping(Box *box) { return (box->lag); }
+void	sing(Box *box, uint8_t hum) { box->hum = hum; }
+uint8_t	hear(Box *box) { return (box->hum); }

@@ -13,6 +13,8 @@ typedef struct
 	uint16_t	now;
 	uint16_t	jar[12];
 	uint8_t		top;
+	uint8_t		lag;
+	uint8_t		hum;
 } Box;
 
 typedef void (*opcode)(Box *, uint16_t);
@@ -32,6 +34,10 @@ void		wipe(Box *box);
 uint8_t		draw(Box *box, uint8_t x, uint8_t y,
 				uint16_t addr, uint8_t size);
 uint8_t		roll(void);
+void		hold(Box *box, uint8_t lag);
+uint8_t		ping(Box *box);
+void		sing(Box *box, uint8_t hum);
+uint8_t		hear(Box *box);
 
 /* IO */
 

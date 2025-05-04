@@ -6,7 +6,7 @@
 # define y(code) ((code & 0x00f0) >> 0x4)
 # define n(code) (code & 0x000f)
 
-void CLS(Box *box, uint16_t code) { (void)code; wipe(box); }
+void CLS(Box *box, uint16_t c) { (void)c; wipe(box); }
 
 void RET(Box *box, uint16_t code) {
 	(void) code;
@@ -21,13 +21,11 @@ void CALL(Box *box, uint16_t code) {
 }
 
 void SE(Box *box, uint16_t code) {
-	if (vx(box, x(code)) == kk(code))
-		jump(box, here(box) + 2);
+	if (vx(box, x(code)) == kk(code)) jump(box, here(box)+2);
 }
 
 void SNE(Box *box, uint16_t code) {
-	if (vx(box, x(code)) != kk(code))
-		jump(box, here(box) + 2);
+	if (vx(box, x(code)) != kk(code)) jump(box, here(box)+2);
 }
 
 void SEXY(Box *box, uint16_t code) {
@@ -65,17 +63,19 @@ void XOR(Box *box, uint16_t code) {
 }
 
 void ADDXY(Box *box, uint16_t code) {
-	const uint8_t val = vx(box, x(code)) + vx(box, y(code));
-	const uint8_t carry = val < x(code) | val < y(code);
+	const uint16_t sum = vx(box, x(code)) + vx(box, y(code));
+	const uint8_t carry = sum > 0xFF;
 	dock(box, 0xF, carry);
-	dock(box, x(code), val);
+	dock(box, x(code), (uint8_t)sum);
 }
 
 void SUBXY(Box *box, uint16_t code) {
-	const uint8_t val = vx(box, x(code)) - vx(box, y(code));
-	const uint8_t borrow = vx(box, x(code)) <= vx(box, y(code));
-	dock(box, 0xF, !borrow);
-	dock(box, x(code), val);
+	const uint8_t	vx0 = vx(box, x(code));
+	const uint8_t vy0 = vx(box, y(code));
+	const uint16_t diff = (uint16_t)vx0 - (uint16_t)vy0;
+
+	dock(box, 0xF, vx0 >= vy0);
+	dock(box, x(code), (uint8_t)diff);
 }
 
 void SHR(Box *box, uint16_t code) {
@@ -85,10 +85,12 @@ void SHR(Box *box, uint16_t code) {
 }
 
 void SUBN(Box *box, uint16_t code) {
-	const uint8_t val = vx(box, y(code)) - vx(box, x(code));
-	const uint8_t borrow = vx(box, y(code)) <= vx(box, x(code));
-	dock(box, 0xF, !borrow);
-	dock(box, x(code), val);
+	const uint8_t	vx0 = vx(box, x(code));
+	const uint8_t vy0 = vx(box, y(code));
+	const uint16_t diff = (uint16_t)vy0 - (uint16_t)vx0;
+
+	dock(box, 0xF, vy0 >= vx0);
+	dock(box, x(code), (uint8_t)diff);
 }
 
 void SHL(Box *box, uint16_t code) {
@@ -122,4 +124,31 @@ void DRW(Box *box, uint16_t code) {
 	const uint8_t collision = draw(box, col, row,
 			look(box), n(code));
 	dock(box, 0xF, collision);
+}
+
+/* void SKP(Box *box, uint16_t code) { /1* TODO *1/ } */
+/* void SKNP(Box *box, uint16_t code) { /1* TODO *1/ } */
+/* void LDK(Box *box, uint16_t code) { /1* TODO *1/ } */
+void DT2VX(Box *box, uint16_t code) {
+	dock(box, x(code), ping(box));
+}
+
+void VX2DT(Box *box, uint16_t code) {
+	const uint8_t lag = vx(box, x(code));
+	hold(box, lag);
+}
+
+void VX2ST(Box *box, uint16_t code) {
+	const uint8_t hum = hear(box);
+	dock(box, x(code), hum);
+}
+
+void ADDI(Box *box, uint16_t code) {
+	const uint16_t addr = look(box) + vx(box, x(code));
+	keep(box, addr);
+}
+
+void VX2I(Box *box, uint16_t code) {
+	const uint8_t val = vx(box, x(code));
+	keep(box, val);
 }
