@@ -28,6 +28,7 @@ uint16_t	look(Box *box);
 void		keep(Box *box, uint16_t addr);
 uint16_t 	here(Box *box);
 void 		jump(Box *box, uint16_t addr);
+void		next(Box *box);
 void 		give(Box *box, uint16_t addr);
 uint16_t 	grab(Box *box);
 void		wipe(Box *box);

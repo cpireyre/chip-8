@@ -18,6 +18,7 @@ void		 hold(Box *box, uint8_t lag) { box->lag = lag; }
 uint8_t	 ping(Box *box) { return (box->lag); }
 void		 sing(Box *box, uint8_t hum) { box->hum = hum; }
 uint8_t	 hear(Box *box) { return (box->hum); }
+void		 next(Box *box) { jump(box, here(box) + 2); }
 
 uint16_t peek(Box *b) {
 	return (b->ram[b->now] << 8 | b->ram[b->now + 1]);

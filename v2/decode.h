@@ -8,9 +8,9 @@
 
 typedef struct {
 	uint16_t	mask;
-	uint16_t	pattern;
+	uint16_t	bits;
 	opcode		fn;
-	uint8_t		next;		
+	uint8_t		advance;		
 } Instr;
 
 static const Instr ops[] = {
