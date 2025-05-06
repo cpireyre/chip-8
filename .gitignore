@@ -1,2 +1,5 @@
 chip8
 *.swp
+*.dSYM
+tags
+*.ch8
