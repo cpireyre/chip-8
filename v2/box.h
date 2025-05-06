@@ -20,7 +20,7 @@ typedef struct
 typedef void (*opcode)(Box *, uint16_t);
 
 void		boot(Box *box);
-uint8_t		peek(Box *box, uint16_t addr);
+uint16_t peek(Box *box);
 void		poke(Box *box, uint16_t addr, uint8_t byte);
 void		dock(Box *box, uint8_t x, uint8_t val);
 uint8_t		vx(Box *box, uint8_t x);

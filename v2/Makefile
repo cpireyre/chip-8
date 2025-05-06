@@ -3,7 +3,7 @@ CFLAGS += -std=c89 -pedantic
 CFLAGS += -fsanitize=address,undefined -g
 
 PHONY: all
-all: main.c box.c test.c io.c opcodes.c
+all: main.c box.c io.c opcodes.c
 	clang $(CFLAGS) $^ -o chip8
 
 PHONY: test

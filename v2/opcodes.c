@@ -139,8 +139,7 @@ void VX2DT(Box *box, uint16_t code) {
 }
 
 void VX2ST(Box *box, uint16_t code) {
-	const uint8_t hum = hear(box);
-	dock(box, x(code), hum);
+	dock(box, x(code), hear(box));
 }
 
 void ADDI(Box *box, uint16_t code) {
