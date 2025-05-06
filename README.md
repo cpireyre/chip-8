@@ -9,7 +9,8 @@ Find ROMs online, see references.
 <h2>Example</h2>
 <p><img alt="The famous IBM logo CHIP-8 ROM output rendered in the terminal."
         src="https://github.com/cpireyre/chip-8/blob/master/assets/screenshot-ibm-logo.png"
-        height=256 width=256
+        height=211 width=286
+        title="IBM"
         />
 </p>
 <h3>References, thanks</h3>
