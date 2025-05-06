@@ -20,7 +20,7 @@ typedef struct
 typedef void (*opcode)(Box *, uint16_t);
 
 void		boot(Box *box);
-uint16_t peek(Box *box);
+uint16_t 	peek(Box *box);
 void		poke(Box *box, uint16_t addr, uint8_t byte);
 void		dock(Box *box, uint8_t x, uint8_t val);
 uint8_t		vx(Box *box, uint8_t x);
@@ -32,8 +32,7 @@ void		next(Box *box);
 void 		give(Box *box, uint16_t addr);
 uint16_t 	grab(Box *box);
 void		wipe(Box *box);
-uint8_t		draw(Box *box, uint8_t x, uint8_t y,
-				uint16_t addr, uint8_t size);
+uint8_t		draw(Box *box, uint8_t x, uint8_t y, uint16_t addr, uint8_t size);
 uint8_t		roll(void);
 void		hold(Box *box, uint8_t lag);
 uint8_t		ping(Box *box);
@@ -42,6 +41,6 @@ uint8_t		hear(Box *box);
 
 /* IO */
 
-void	show(Box *box);
+void		show(Box *box);
 
 #endif /* BOX_H */

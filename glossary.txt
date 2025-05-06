@@ -1,34 +1,34 @@
 2025-05-01 14:39:22
 					Nouns
-	- The machine itself	 : Box
-	- Memory							 : Ram
-	- Stack								 : Jar
-	- Stack pointer				 : Top
+	- The machine itself   : Box
+	- Memory			   : Ram
+	- Stack				   : Jar
+	- Stack pointer		   : Top
 	- Registers (V0 -> Vx) : Bay
-	- I register					 : Eye
-	- Program counter			 : Now
-	- Display							 : Pix
-	- Delay timer					 : Lag
-	- Sound timer					 : Hum
-	- Keyboard						 : Paw
+	- I register		   : Eye
+	- Program counter	   : Now
+	- Display			   : Pix
+	- Delay timer		   : Lag
+	- Sound timer		   : Hum
+	- Keyboard			   : Paw
 
 					Verbs
-read RAM byte            : Peek
-write RAM byte           : Poke
-get Vx                   : Vx (fka Ship (fka Read))
-set Vx                   : Dock (fka Load)
-get I                    : Look
-set I                    : Keep
-get PC                   : Here
-set PC                   : Jump 
-push stack               : Give
-pop stack                : Grab
-get delay timer          : Ping
-set delay timer          : Hold (fka Wait)
-get sound timer          : Hear
-set sound timer          : Sing
-random byte              : Roll
-check keypress					 : Feel
-Update bitmap						 : Draw
+read RAM byte              : Peek
+write RAM byte             : Poke
+get Vx                     : Vx (fka Ship (fka Read))
+set Vx                     : Dock (fka Load)
+get I                      : Look
+set I                      : Keep
+get PC                     : Here
+set PC                     : Jump 
+push stack                 : Give
+pop stack                  : Grab
+get delay timer            : Ping
+set delay timer            : Hold (fka Wait)
+get sound timer            : Hear
+set sound timer            : Sing
+random byte                : Roll
+check keypress			   : Feel
+Update bitmap			   : Draw
 
 Note: "Blit" can be reserved for the IO rendering layer
