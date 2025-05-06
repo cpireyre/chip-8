@@ -11,47 +11,63 @@ static int		slurp(Box *box, const char *path);
 
 # define nib(code) ((code & 0xf000) >> 12)
 # define last(code) (code & 0x000f)
+# define false 0
+# define true  1
+
+typedef struct {
+	uint16_t	mask;
+	uint16_t	pattern;
+	opcode		fn;
+	uint8_t		next;		
+} Instr;
+
+static const Instr table[] = {
+	{0xFFFF, 0x00E0, CLS, true},
+	{0xFFFF, 0x00EE, RET, true},
+	{0xF000, 0x1000, JP, false},
+	{0xF000, 0x2000, CALL, false},
+	{0xF000, 0x3000, SE, true},
+	{0xF000, 0x4000, SNE, true},
+	{0xF000, 0x5000, SEXY, true},
+	{0xF000, 0x6000, LD, true},
+	{0xF000, 0x7000, ADD, true},
+	{0xF00F, 0x8000, LDXY, true},
+	{0xF00F, 0x8001, OR, true},
+	{0xF00F, 0x8002, AND, true},
+	{0xF00F, 0x8003, XOR, true},
+	{0xF00F, 0x8004, ADDXY, true},
+	{0xF00F, 0x8005, SUBXY, true},
+	{0xF00F, 0x8006, SHR, true},
+	{0xF00F, 0x8007, SUBN, true},
+	{0xF00F, 0x800E, SHL, true},
+	{0xF000, 0x9000, SNEXY, true},
+	{0xF000, 0xA000, LDI, true},
+	{0xF000, 0xB000, JP0, false},
+	{0xF000, 0xC000, RND, true},
+	{0xF000, 0xD000, DRW, true},
+	{0xF0FF, 0xF007, DT2VX, true},
+	{0xF0FF, 0xF015, VX2DT, true},
+	{0xF0FF, 0xF018, VX2ST, true},
+	{0xF0FF, 0xF01E, ADDI, true},
+	{0xF0FF, 0xF029, VX2I, true}
+};
 
 void	run(Box *box)
 {
 	uint16_t	code;
+	uint32_t	i;
+	const uint8_t num_ops = sizeof(table) / sizeof(*table);
 
 	while (here(box) < 0x3f1)
 	{
 		code = fetch(box);
-		switch (code) {
-			case 0x00E0: CLS(box, code); break;
-			case 0x00EE: RET(box, code); break;
-		}
-		switch (nib(code)) {
-			case 0xA: LDI(box, code); break;
-			case 0x2: CALL(box, code); continue;
-			case 0x3: SE(box, code); break;
-			case 0x4: SNE(box, code); break;
-			case 0x5: SEXY(box, code); break;
-			case 0x6: LD(box, code); break;
-			case 0x7: ADD(box, code); break;
-			case 0x8: {
-						  switch (last(code)) {
-							  case 0x0: LDXY(box, code); break;
-							  case 0x1: OR(box, code); break;
-							  case 0x2: AND(box, code); break;
-							  case 0x3: XOR(box, code); break;
-							  case 0x4: ADDXY(box, code); break;
-							  case 0x5: SUBXY(box, code); break;
-							  case 0x6: SHR(box, code); break;
-							  case 0x7: SUBN(box, code); break;
-							  case 0xE: SHL(box, code); break;
-						  }
-					  }
-								break;
-			case 0x1: JP(box, code); continue;
-			case 0xD: DRW(box, code); show(box); break;
-			case 0x9: SNEXY(box, code); break;
-			case 0xB: JP0(box, code); break;
-			case 0xC: RND(box, code); break;
-		}
-		next(box);
+    for (i = 0; i < num_ops; ++i)
+        if ((code & table[i].mask) == table[i].pattern)
+						break;
+		if (i < num_ops)
+			table[i].fn(box, code);
+		if (i == num_ops || table[i].next == true) next(box);
+		show(box);
 	}
 }
 
