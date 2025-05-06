@@ -1,4 +1,4 @@
-CFLAGS := -Wall -Wextra -Werror -Wimplicit-fallthrough
+CFLAGS := -Wall -Wextra -Werror
 CFLAGS += -std=c89 -pedantic
 CFLAGS += -fsanitize=address,undefined -g
 
