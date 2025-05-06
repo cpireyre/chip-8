@@ -1,0 +1,47 @@
+#ifndef DECODE_H
+# define DECODE_H
+
+# include "opcodes.h"
+
+# define false 0
+# define true  1
+
+typedef struct {
+	uint16_t	mask;
+	uint16_t	pattern;
+	opcode		fn;
+	uint8_t		next;		
+} Instr;
+
+static const Instr ops[] = {
+	{0xFFFF, 0x00E0, CLS, true},
+	{0xFFFF, 0x00EE, RET, true},
+	{0xF000, 0x1000, JP, false},
+	{0xF000, 0x2000, CALL, false},
+	{0xF000, 0x3000, SE, true},
+	{0xF000, 0x4000, SNE, true},
+	{0xF000, 0x5000, SEXY, true},
+	{0xF000, 0x6000, LD, true},
+	{0xF000, 0x7000, ADD, true},
+	{0xF00F, 0x8000, LDXY, true},
+	{0xF00F, 0x8001, OR, true},
+	{0xF00F, 0x8002, AND, true},
+	{0xF00F, 0x8003, XOR, true},
+	{0xF00F, 0x8004, ADDXY, true},
+	{0xF00F, 0x8005, SUBXY, true},
+	{0xF00F, 0x8006, SHR, true},
+	{0xF00F, 0x8007, SUBN, true},
+	{0xF00F, 0x800E, SHL, true},
+	{0xF000, 0x9000, SNEXY, true},
+	{0xF000, 0xA000, LDI, true},
+	{0xF000, 0xB000, JP0, false},
+	{0xF000, 0xC000, RND, true},
+	{0xF000, 0xD000, DRW, true},
+	{0xF0FF, 0xF007, DT2VX, true},
+	{0xF0FF, 0xF015, VX2DT, true},
+	{0xF0FF, 0xF018, VX2ST, true},
+	{0xF0FF, 0xF01E, ADDI, true},
+	{0xF0FF, 0xF029, VX2I, true}
+};
+
+#endif /* DECODE_H */
