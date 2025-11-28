@@ -15,6 +15,6 @@ Find ROMs online, see references.
 </p>
 <h3>References, thanks</h3>
 <ul>
-<li><a href="https://github.com/Timendus/chip8-test-suite">chip-8-test-suite</a></li>
+<li><a href="https://github.com/Timendus/chip8-test-suite">chip8-test-suite</a></li>
 <li><a href="http://devernay.free.fr/hacks/chip8/C8TECH10.HTM">Cowgod's Chip-8 technical reference</a></li>
 </ul>
