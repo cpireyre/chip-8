@@ -1,8 +1,7 @@
-#include <string.h> /* bzero */
-void boot(Box *b) { bzero(b, sizeof(*b)); b->pc = 0x200; }
-void poke(Box *b, u16 a, u8 v) { b->ram[a] = v; }
-u16 here(Box *b) { return (b->pc); }
-void		 next(Box *b) { b->pc += 2; }
+void    boot(Box *b)              { b->pc = 0x200; }
+void    poke(Box *b, u16 a, u8 v) { b->ram[a] = v; }
+u16     here(Box *b)              { return (b->pc); }
+void    next(Box *b)              { b->pc += 2; }
 
 u16 peek(Box *b) {
 	return (b->ram[b->pc] << 8 | b->ram[b->pc + 1]);
