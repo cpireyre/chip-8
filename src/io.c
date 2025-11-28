@@ -1,9 +1,7 @@
-#include "box.h"
-#include <unistd.h>
-
+#include <unistd.h> /* write */
 struct display_string {
-	char		*xs;
-	uint8_t	sz;
+	char    *xs;
+	u8      sz;
 };
 
 void	show(Box *box) {
@@ -11,9 +9,9 @@ void	show(Box *box) {
 		{" ", 1},
 		{"█", 3}
 	};
-	uint8_t		row, col;
-	uint8_t		index;
-	uint8_t		fill;
+	u8		row, col;
+	u8		index;
+	u8		fill;
 
 	write(1, "\x1b[H", 3);
 	for (row = 0; row < 32; row++) {

@@ -1,7 +1,12 @@
 CFLAGS := -Wall -Wextra -Werror
 CFLAGS += -std=c89 -pedantic
 CFLAGS += -fsanitize=address,undefined -g
+CPPFLAGS := -Iinclude/
 
+bin := chip8
 PHONY: all
-all: main.c box.c io.c opcodes.c
-	cc $(CFLAGS) $^ -o chip8
+all: src/main.c
+	cc $(CPPFLAGS) $(CFLAGS) $^ -o $(bin)
+
+clean:
+	$(RM) $(bin)

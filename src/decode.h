@@ -7,10 +7,10 @@
 # define true  1
 
 typedef struct {
-	uint16_t	mask;
-	uint16_t	bits;
+	u16	mask;
+	u16	bits;
 	opcode		fn;
-	uint8_t		advance;		
+	u8		advance;		
 } Instr;
 
 static const Instr ops[] = {

@@ -1,8 +1,11 @@
-#include <fcntl.h>
-#include <stdio.h>
-#include <unistd.h>
+#include <fcntl.h> /* open */
+#include <stdio.h> /* printf */
 #include "box.h"
 #include "decode.h"
+#include "opcodes.h"
+#include "box.c"
+#include "opcodes.c"
+#include "io.c"
 
 static int	slurp(Box *box, const char *path);
 static void	run(Box *box);
@@ -23,9 +26,9 @@ int main(int argc, char **argv)
 }
 
 static void	run(Box *box) {
-	const uint8_t n_ops = sizeof(ops) / sizeof(*ops);
-	uint16_t			code;
-	uint8_t				i;
+	const u8 n_ops = sizeof(ops) / sizeof(*ops);
+	u16			code;
+	u8				i;
 
 	while (here(box) < 0x3f1) {
 		code = peek(box);
@@ -40,10 +43,10 @@ static void	run(Box *box) {
 
 static int	slurp(Box *box, const char *path)
 {
-	uint8_t				 byte;
-	uint16_t			 total;
+	u8				 byte;
+	u16			 total;
 	int 					 fd, ret;
-	const uint16_t ram_cap = 4096 - 0x200;
+	const u16 ram_cap = 4096 - 0x200;
 
 	fd = open(path, O_RDONLY);
 	if (fd < 0) { perror("open"); return (1); }

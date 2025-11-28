@@ -1,20 +1,17 @@
-#include "box.h"
-#include <string.h>
-#include <stdlib.h>
-
+#include <string.h> /* bzero */
 void boot(Box *b) { bzero(b, sizeof(*b)); b->pc = 0x200; }
-void poke(Box *b, uint16_t a, uint8_t v) { b->ram[a] = v; }
-uint16_t here(Box *b) { return (b->pc); }
+void poke(Box *b, u16 a, u8 v) { b->ram[a] = v; }
+u16 here(Box *b) { return (b->pc); }
 void		 next(Box *b) { b->pc += 2; }
 
-uint16_t peek(Box *b) {
+u16 peek(Box *b) {
 	return (b->ram[b->pc] << 8 | b->ram[b->pc + 1]);
 }
 
-uint8_t	draw(Box *b, uint8_t x, uint8_t y,
-		uint16_t addr, uint8_t num_sprite_rows) {
-	uint8_t	n, tmp, flag, col;
-	uint8_t *sprite = b->ram + addr;
+u8	draw(Box *b, u8 x, u8 y,
+		u16 addr, u8 num_sprite_rows) {
+	u8	n, tmp, flag, col;
+	u8 *sprite = b->ram + addr;
 
 	x &= 63;
 	y &= 31;
